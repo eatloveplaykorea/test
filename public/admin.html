@@ -10,6 +10,10 @@
     table.list th, table.list td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: middle; }
     table.list th { color: var(--muted); font-size: 12px; }
     .tbl-wrap { overflow-x: auto; }
+    .stats { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+    .stat .v { font-size: 26px; font-weight: 800; }
+    .btn.danger { background: var(--danger); }
+    .tabs { flex-wrap: wrap; }
   </style>
 </head>
 <body data-no-cart="1">
@@ -24,13 +28,31 @@
 
     <div id="panel" hidden>
       <div class="tabs">
-        <button class="active" data-tab="upload">상품 등록</button>
+        <button class="active" data-tab="dash">대시보드</button>
+        <button data-tab="upload">상품 등록</button>
         <button data-tab="products">상품 관리</button>
         <button data-tab="orders">주문 관리 <span class="cart-count" id="pending-count">0</span></button>
         <span class="spacer"></span><button id="logout">로그아웃</button>
       </div>
 
-      <form class="card" data-panel="upload" id="up-form" style="max-width:720px">
+      <div data-panel="dash">
+        <div class="grid stats" id="stats"></div>
+        <div class="card" style="margin-top:16px">
+          <h3 style="margin-top:0">입금 대기 주문</h3>
+          <div id="dash-pending" class="small"></div>
+        </div>
+        <div class="card" style="margin-top:16px;border-color:#f3c4c4">
+          <h3 style="margin-top:0;color:var(--danger)">전체 삭제</h3>
+          <p class="small muted">되돌릴 수 없습니다. 삭제한 상품의 파일은 서버에서도 지워지고, 구매자도 더 이상 내려받을 수 없습니다.</p>
+          <div class="row">
+            <button class="btn danger small" data-wipe="products">상품 전체 삭제</button>
+            <button class="btn danger small" data-wipe="orders">주문 전체 삭제</button>
+            <button class="btn danger small" data-wipe="all">상품·주문 모두 삭제</button>
+          </div>
+        </div>
+      </div>
+
+      <form class="card" data-panel="upload" id="up-form" style="max-width:720px" hidden>
         <input type="hidden" name="id" id="edit-id">
         <div class="row">
           <label class="field" style="flex:1"><span>분류</span>
@@ -56,9 +78,18 @@
         <div class="row"><button class="btn" id="up-submit">등록하기</button><button type="button" class="btn secondary" id="cancel-edit" hidden>수정 취소</button><span class="small muted" id="up-status"></span></div>
       </form>
 
-      <div class="card tbl-wrap" data-panel="products" hidden><table class="list" id="prod-table"></table></div>
+      <div class="card tbl-wrap" data-panel="products" hidden>
+        <div class="row" style="margin-bottom:8px">
+          <button class="btn danger small" id="prod-del-sel" disabled>선택 삭제</button>
+          <button class="btn secondary small" data-wipe="products">전체 삭제</button>
+        </div>
+        <table class="list" id="prod-table"></table>
+      </div>
       <div class="card tbl-wrap" data-panel="orders" hidden>
-        <div class="row" style="margin-bottom:8px"><label class="small">상태 <select id="ord-filter" style="width:auto"><option value="">전체</option><option value="pending" selected>입금 대기</option><option value="paid">입금 확인</option><option value="shipped">발송 완료</option><option value="cancelled">취소</option></select></label></div>
+        <div class="row" style="margin-bottom:8px">
+          <button class="btn danger small" id="ord-del-sel" disabled>선택 삭제</button>
+          <button class="btn secondary small" data-wipe="orders">전체 삭제</button>
+          <span class="spacer"></span><label class="small">상태 <select id="ord-filter" style="width:auto"><option value="">전체</option><option value="pending" selected>입금 대기</option><option value="paid">입금 확인</option><option value="shipped">발송 완료</option><option value="cancelled">취소</option></select></label></div>
         <table class="list" id="ord-table"></table>
       </div>
     </div>

@@ -2,7 +2,7 @@
  * 쪽집게 영어학원 쇼핑몰 서버
  * - 관리자가 모의고사/내신 문제집 PDF와 문구 상품을 등록
  * - 손님은 장바구니 → 주문(무통장 입금) → 관리자 입금 확인 → 주문조회에서 PDF 다운로드
- * 실행: ADMIN_PASSWORD=비밀번호 npm start
+ * 실행: ADMIN_PASSWORD=비밀번호 npm start   (비밀번호는 코드에 두지 않고 환경변수에서만 읽음)
  */
 const express = require('express');
 const multer = require('multer');
@@ -11,7 +11,8 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin1234';
+// 관리자 비밀번호는 오직 환경변수에서 읽는다. 없으면 관리자 기능이 꺼진다.
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -19,7 +20,7 @@ const FILES_DIR = path.join(ROOT, 'storage', 'files');      // 판매용 PDF (�
 const PUBLIC_UP = path.join(ROOT, 'storage', 'public');     // 표지·미리보기 (공개)
 [DATA_DIR, FILES_DIR, PUBLIC_UP].forEach(d => fs.mkdirSync(d, { recursive: true }));
 
-if (!process.env.ADMIN_PASSWORD) console.warn('⚠️  ADMIN_PASSWORD 환경변수가 없어 기본 비밀번호(admin1234)를 사용합니다. 운영 전 꼭 바꾸세요.');
+if (!ADMIN_PASSWORD) console.warn('⚠️  ADMIN_PASSWORD 환경변수가 없어 관리자 로그인이 비활성화됩니다.');
 
 /* ---------- 간단한 JSON 저장소 ---------- */
 const SEED_STATIONERY = [
@@ -63,16 +64,52 @@ const upload = multer({
 
 /* ---------- 앱 ---------- */
 const app = express();
+app.set('trust proxy', 1); // 프록시(배포 환경) 뒤에서 HTTPS/IP 인식
 app.use(express.json());
 app.use(express.static(path.join(ROOT, 'public')));
 app.use('/uploads', express.static(PUBLIC_UP));
 
-const isAdmin = req => {
-  const p = req.get('x-admin-password') || '';
-  const h = v => crypto.createHash('sha256').update(v).digest();
-  return crypto.timingSafeEqual(h(p), h(ADMIN_PASSWORD));
+/* ---------- 관리자 인증 (모든 확인은 서버에서) ----------
+ * 로그인 시 비밀번호를 환경변수 ADMIN_PASSWORD 와 서버에서 비교하고,
+ * 맞으면 무작위 세션 토큰을 HttpOnly 쿠키로 발급한다. 브라우저에는 비밀번호를 저장하지 않는다. */
+const SESSION_TTL = 1000 * 60 * 60 * 8; // 8시간
+const sessions = new Map();             // token -> 만료시각
+const loginFails = new Map();           // ip -> { n, until }
+const sha = v => crypto.createHash('sha256').update(String(v)).digest();
+const checkPassword = pw => !!ADMIN_PASSWORD && crypto.timingSafeEqual(sha(pw), sha(ADMIN_PASSWORD));
+const cookies = req => Object.fromEntries((req.headers.cookie || '').split(';').map(c => c.trim().split('=')).filter(([k]) => k).map(([k, ...v]) => [k, decodeURIComponent(v.join('='))]));
+const sessionOf = req => {
+  const t = cookies(req).jg_admin;
+  if (!t || !sessions.has(t)) return null;
+  if (sessions.get(t) < Date.now()) { sessions.delete(t); return null; }
+  return t;
 };
-const admin = (req, res, next) => isAdmin(req) ? next() : res.status(401).json({ error: '관리자 비밀번호가 올바르지 않습니다.' });
+const setCookie = (req, res, val, maxAge) => res.setHeader('Set-Cookie',
+  `jg_admin=${val}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${req.secure ? '; Secure' : ''}`);
+const admin = (req, res, next) => {
+  if (!ADMIN_PASSWORD) return res.status(503).json({ error: '서버에 ADMIN_PASSWORD 환경변수가 설정되지 않았습니다.' });
+  if (!sessionOf(req)) return res.status(401).json({ error: '관리자 로그인이 필요합니다.' });
+  next();
+};
+
+app.post('/api/admin/login', (req, res) => {
+  if (!ADMIN_PASSWORD) return res.status(503).json({ error: '서버에 ADMIN_PASSWORD 환경변수가 설정되지 않았습니다.' });
+  const ip = req.ip, f = loginFails.get(ip);
+  if (f && f.until > Date.now()) return res.status(429).json({ error: '로그인 시도가 너무 많습니다. 10분 후 다시 시도하세요.' });
+  if (!checkPassword(req.body?.password || '')) {
+    const n = (f?.n || 0) + 1;
+    loginFails.set(ip, { n, until: n >= 5 ? Date.now() + 10 * 60 * 1000 : 0 });
+    return res.status(401).json({ error: '비밀번호가 올바르지 않습니다.' });
+  }
+  loginFails.delete(ip);
+  const token = crypto.randomBytes(32).toString('hex');
+  sessions.set(token, Date.now() + SESSION_TTL);
+  setCookie(req, res, token, SESSION_TTL / 1000);
+  res.json({ ok: true });
+});
+app.post('/api/admin/logout', (req, res) => { const t = sessionOf(req); if (t) sessions.delete(t); setCookie(req, res, '', 0); res.json({ ok: true }); });
+app.get('/api/admin/me', admin, (req, res) => res.json({ ok: true }));
+
 const publicProduct = ({ file, ...p }) => ({ ...p, hasFile: !!file });
 const rmFile = (dir, name) => { if (name) fs.rm(path.join(dir, path.basename(name)), () => {}); };
 
@@ -82,7 +119,6 @@ app.get('/api/products', (req, res) => {
   res.json(db.products.filter(p => p.active && (!kind || p.kind === kind)).map(publicProduct).reverse());
 });
 
-app.post('/api/admin/login', admin, (req, res) => res.json({ ok: true }));
 app.get('/api/admin/products', admin, (req, res) => res.json(db.products.slice().reverse()));
 
 // 상품 등록/수정
@@ -118,13 +154,21 @@ app.put('/api/admin/products/:id', admin, withUpload, (req, res) => {
   applyFields(p, req.body, req.files); save();
   res.json(p);
 });
+function removeProduct(p) {
+  db.products = db.products.filter(x => x !== p);
+  rmFile(FILES_DIR, p.file); rmFile(PUBLIC_UP, p.cover); rmFile(PUBLIC_UP, p.preview);
+}
 app.delete('/api/admin/products/:id', admin, (req, res) => {
   const p = db.products.find(x => x.id === req.params.id);
   if (!p) return res.status(404).json({ error: '상품이 없습니다.' });
-  // 이미 판매된 상품은 구매자 다운로드를 위해 숨김 처리만
-  if (db.orders.some(o => o.items.some(i => i.id === p.id))) p.active = false;
-  else { db.products = db.products.filter(x => x !== p); rmFile(FILES_DIR, p.file); rmFile(PUBLIC_UP, p.cover); rmFile(PUBLIC_UP, p.preview); }
-  save(); res.json({ ok: true });
+  removeProduct(p); save(); res.json({ ok: true });
+});
+// 일괄 삭제: { ids: [...] } 또는 { all: true }
+app.post('/api/admin/products/delete', admin, (req, res) => {
+  const ids = new Set(req.body?.all ? db.products.map(p => p.id) : (req.body?.ids || []));
+  const targets = db.products.filter(p => ids.has(p.id));
+  targets.forEach(removeProduct); save();
+  res.json({ deleted: targets.length });
 });
 app.get('/api/admin/files/:id', admin, (req, res) => {
   const p = db.products.find(x => x.id === req.params.id);
@@ -185,6 +229,31 @@ app.get('/api/download/:no/:token/:pid', (req, res) => {
   res.download(path.join(FILES_DIR, p.file), p.fileName || p.title + path.extname(p.file));
 });
 
+app.delete('/api/admin/orders/:no', admin, (req, res) => {
+  const before = db.orders.length;
+  db.orders = db.orders.filter(o => o.no !== req.params.no);
+  if (db.orders.length === before) return res.status(404).json({ error: '주문이 없습니다.' });
+  save(); res.json({ ok: true });
+});
+app.post('/api/admin/orders/delete', admin, (req, res) => {
+  const ids = new Set(req.body?.all ? db.orders.map(o => o.no) : (req.body?.ids || []));
+  const before = db.orders.length;
+  db.orders = db.orders.filter(o => !ids.has(o.no)); save();
+  res.json({ deleted: before - db.orders.length });
+});
+// 대시보드 요약
+app.get('/api/admin/stats', admin, (req, res) => {
+  const paid = db.orders.filter(o => o.status === 'paid' || o.status === 'shipped');
+  const today = new Date().toISOString().slice(0, 10);
+  res.json({
+    products: db.products.length,
+    byKind: ['mock', 'naesin', 'stationery'].map(k => db.products.filter(p => p.kind === k).length),
+    orders: db.orders.length,
+    pending: db.orders.filter(o => o.status === 'pending').length,
+    revenue: paid.reduce((s, o) => s + o.total, 0),
+    todayOrders: db.orders.filter(o => o.createdAt.slice(0, 10) === today).length,
+  });
+});
 app.get('/api/admin/orders', admin, (req, res) => res.json(db.orders.slice().reverse()));
 app.post('/api/admin/orders/:no/status', admin, (req, res) => {
   const o = db.orders.find(x => x.no === req.params.no);
