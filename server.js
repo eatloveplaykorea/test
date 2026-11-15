@@ -1,5 +1,5 @@
 /*
- * 중계 영어연구소 쇼핑몰 서버
+ * 쪽집게 영어학원 쇼핑몰 서버
  * - 관리자가 모의고사/내신 문제집 PDF와 문구 상품을 등록
  * - 손님은 장바구니 → 주문(무통장 입금) → 관리자 입금 확인 → 주문조회에서 PDF 다운로드
  * 실행: ADMIN_PASSWORD=비밀번호 npm start
@@ -161,7 +161,7 @@ app.post('/api/orders', (req, res) => {
     items: lines, subtotal, ship, total: subtotal + ship,
   };
   db.orders.push(order); save();
-  res.json({ no: order.no, total: order.total, bank: process.env.BANK_ACCOUNT || '○○은행 000-0000-0000 (예금주: 중계 영어연구소)' });
+  res.json({ no: order.no, total: order.total, bank: process.env.BANK_ACCOUNT || '○○은행 000-0000-0000 (예금주: 쪽집게 영어학원)' });
 });
 
 // 주문 조회 (주문번호 + 연락처)
@@ -194,4 +194,4 @@ app.post('/api/admin/orders/:no/status', admin, (req, res) => {
   res.json(o);
 });
 
-app.listen(PORT, () => console.log(`중계 영어연구소 쇼핑몰: http://localhost:${PORT}  (관리자: /admin.html)`));
+app.listen(PORT, () => console.log(`쪽집게 영어학원 쇼핑몰: http://localhost:${PORT}  (관리자: /admin.html)`));

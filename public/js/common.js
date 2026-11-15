@@ -170,7 +170,7 @@
     el.className = 'site-header';
     el.innerHTML = `
       <div class="container">
-        <a class="logo" href="index.html"><span class="logo-mark">중</span>중계 영어연구소</a>
+        <a class="logo" href="index.html"><span class="logo-mark">쪽</span>쪽집게 영어학원</a>
         <nav class="nav">${NAV.map(n => `<a href="${n.href}" class="${n.href === here ? 'active' : ''}">${n.label}</a>`).join('')}</nav>
         <a class="cart-btn" href="#cart">🛒 장바구니<span class="cart-count" id="cart-count">0</span></a>
       </div>`;
@@ -180,7 +180,7 @@
     const el = document.getElementById('site-footer'); if (!el) return;
     el.className = 'site-footer';
     el.innerHTML = `<div class="container">
-      <div><b>중계 영어연구소</b> · 서울 노원구 중계동 학원가</div>
+      <div><b>쪽집게 영어학원</b> · 서울 노원구 중계동 학원가</div>
       <div>고등 영어 모의고사 · 중계동 학교별 내신 문제집 · 학습 문구</div>
       <div style="margin-top:8px">판매 자료는 구매자 개인 학습용이며 무단 복제·재배포를 금합니다. · <a href="admin.html">관리자</a></div></div>`;
   }
