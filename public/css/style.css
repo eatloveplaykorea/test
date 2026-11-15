@@ -198,3 +198,5 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary-sof
   .questions.one-col { columns: 1 !important; }
   .print-hide-answers .answer-key { display: none; }
 }
+
+[hidden] { display: none !important; }

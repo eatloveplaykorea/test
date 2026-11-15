@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>관리자 · 중계 영어연구소</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    table.list { width: 100%; border-collapse: collapse; font-size: 14px; }
+    table.list th, table.list td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: middle; }
+    table.list th { color: var(--muted); font-size: 12px; }
+    .tbl-wrap { overflow-x: auto; }
+  </style>
+</head>
+<body data-no-cart="1">
+  <header id="site-header"></header>
+  <main class="container" style="padding-bottom:48px">
+    <div class="page-head"><h1>관리자</h1><p>모의고사·내신 문제집 파일과 문구 상품을 올리고, 주문 입금을 확인합니다.</p></div>
+
+    <form class="card" id="login" style="max-width:400px">
+      <label class="field"><span>관리자 비밀번호</span><input type="password" id="pw" required></label>
+      <button class="btn block">로그인</button>
+    </form>
+
+    <div id="panel" hidden>
+      <div class="tabs">
+        <button class="active" data-tab="upload">상품 등록</button>
+        <button data-tab="products">상품 관리</button>
+        <button data-tab="orders">주문 관리 <span class="cart-count" id="pending-count">0</span></button>
+        <span class="spacer"></span><button id="logout">로그아웃</button>
+      </div>
+
+      <form class="card" data-panel="upload" id="up-form" style="max-width:720px">
+        <input type="hidden" name="id" id="edit-id">
+        <div class="row">
+          <label class="field" style="flex:1"><span>분류</span>
+            <select name="kind" id="up-kind"><option value="naesin">내신 문제집</option><option value="mock">모의고사</option><option value="stationery">문구</option></select></label>
+          <label class="field" style="flex:1"><span>가격 (원)</span><input type="number" name="price" min="0" step="100" required></label>
+        </div>
+        <label class="field"><span>상품명</span><input type="text" name="title" required placeholder="예: 대진고 2학년 2학기 기말 대비 변형문제 200제"></label>
+        <div class="row only-book">
+          <label class="field" style="flex:1"><span>학교</span><input type="text" name="school" list="schools" placeholder="대진고"></label>
+          <label class="field" style="flex:1"><span>학년</span>
+            <select name="grade"><option value="">-</option><option>고1</option><option>고2</option><option>고3</option></select></label>
+          <label class="field" style="flex:1"><span>학기·시험</span><input type="text" name="term" placeholder="2학기 기말"></label>
+          <label class="field" style="flex:1"><span>쪽수</span><input type="number" name="pages" min="0"></label>
+        </div>
+        <datalist id="schools"><option>대진고</option><option>대진여고</option><option>서라벌고</option><option>청원고</option><option>청원여고</option><option>재현고</option><option>영신여고</option><option>상계고</option><option>노원고</option><option>불암고</option></datalist>
+        <label class="field"><span>설명</span><textarea name="desc" style="min-height:90px" placeholder="범위, 문항 수, 수록 유형, 정답·해설 포함 여부 등"></textarea></label>
+        <label class="field only-book"><span>판매 파일 (PDF·HWP·ZIP 등, 최대 100MB) — 입금 확인된 구매자만 다운로드</span><input type="file" name="file" accept=".pdf,.hwp,.hwpx,.docx,.zip"></label>
+        <div class="row">
+          <label class="field" style="flex:1"><span>표지 이미지 (선택)</span><input type="file" name="cover" accept="image/*"></label>
+          <label class="field only-book" style="flex:1"><span>미리보기 파일 (선택, 공개됨)</span><input type="file" name="preview" accept=".pdf,image/*"></label>
+          <label class="field only-stationery" style="flex:1"><span>아이콘 (이미지 없을 때)</span><input type="text" name="icon" placeholder="🖊️"></label>
+        </div>
+        <div class="row"><button class="btn" id="up-submit">등록하기</button><button type="button" class="btn secondary" id="cancel-edit" hidden>수정 취소</button><span class="small muted" id="up-status"></span></div>
+      </form>
+
+      <div class="card tbl-wrap" data-panel="products" hidden><table class="list" id="prod-table"></table></div>
+      <div class="card tbl-wrap" data-panel="orders" hidden>
+        <div class="row" style="margin-bottom:8px"><label class="small">상태 <select id="ord-filter" style="width:auto"><option value="">전체</option><option value="pending" selected>입금 대기</option><option value="paid">입금 확인</option><option value="shipped">발송 완료</option><option value="cancelled">취소</option></select></label></div>
+        <table class="list" id="ord-table"></table>
+      </div>
+    </div>
+  </main>
+  <footer id="site-footer"></footer>
+  <script src="js/common.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

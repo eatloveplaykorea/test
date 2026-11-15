@@ -1,0 +1,10 @@
+{
+  "name": "junggye-english-store",
+  "version": "1.0.0",
+  "private": true,
+  "description": "고등 영어 모의고사·중계동 내신 문제집 PDF와 학습 문구를 판매하는 쇼핑몰",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "express": "^5.1.0", "multer": "^2.0.2" }
+}
