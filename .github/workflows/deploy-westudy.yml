@@ -1,0 +1,34 @@
+name: Deploy we.study.today
+
+on:
+  push:
+    branches: [claude/tender-darwin-72mxlq, main]
+    paths: ['westudy/**', '.github/workflows/deploy-westudy.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-westudy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: westudy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: westudy/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Cloudflare Pages에 배포
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: f8fbb565dac4e3a094f73f602ac37245
+          workingDirectory: westudy
+          command: pages deploy out --project-name westudy --branch main --commit-dirty=true
