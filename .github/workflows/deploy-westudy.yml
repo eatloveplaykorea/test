@@ -31,4 +31,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: f8fbb565dac4e3a094f73f602ac37245
           workingDirectory: westudy
+          wranglerVersion: "4.20.0"
           command: pages deploy out --project-name westudy --branch main --commit-dirty=true
