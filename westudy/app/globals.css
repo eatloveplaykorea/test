@@ -186,7 +186,10 @@ table.grid { border-collapse: collapse; width: 100%; min-width: 560px; }
   .viewer.empty-viewer { min-height: 0; }
   .viewer.empty-viewer .placeholder { padding: 24px 16px; }
   .viewer.empty-viewer .big { font-size: 32px; }
-  /* 휴대폰 브라우저는 PDF를 화면 안에 잘 못 띄우므로 미리보기를 숨기고 버튼으로 연다 */
+}
+/* 휴대폰 브라우저는 PDF를 화면 안에 잘 못 띄우므로 휴대폰 폭에서만 미리보기를 숨기고 버튼으로 연다.
+   좁은 창·태블릿(601~860px)에서는 미리보기를 보여 준다. */
+@media (max-width: 600px) {
   .viewer.has-doc { display: none; }
   .mobile-only { display: inline; }
 }

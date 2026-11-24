@@ -15,7 +15,9 @@ export async function generateMetadata({ params }: { params: Params }) {
   const p = await params;
   const exam = getExam(p.cat, p.id);
   const sub = SUBJECTS[p.subject as SubjectId];
-  return { title: exam && sub ? `${exam.title} ${sub.name} — we.study.today` : 'we.study.today' };
+  // 과목이 하나뿐인 시험(한능검·논술)은 과목 이름을 제목에 붙이지 않는다
+  const name = exam && sub ? (exam.subjects.length > 1 ? `${exam.title} ${sub.name}` : exam.title) : '';
+  return { title: name ? `${name} — we.study.today` : 'we.study.today' };
 }
 
 export default async function ExamPage({ params }: { params: Params }) {
