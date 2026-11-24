@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { EXAMS, SUBJECTS, getCategory, getExam, isPast, neighbors, type SubjectId } from '@/lib/exams';
 import { filesOf } from '@/lib/files';
 import { docsOf } from '@/lib/docs';
-import ExamTools from '@/components/ExamTools';
+import SaveButton from '@/components/SaveButton';
 import DocViewer, { DocList } from '@/components/DocViewer';
 
 type Params = Promise<{ cat: string; id: string; subject: string }>;
@@ -43,7 +43,10 @@ export default async function ExamPage({ params }: { params: Params }) {
         <div className="crumb">
           <Link href="/">홈</Link> › <Link href={`${base}/`}>{cat.short}</Link> › {exam.year || exam.organizer}
         </div>
-        <h1>{exam.title}</h1>
+        <h1 className="title-row">
+          <span>{exam.title}</span>
+          <SaveButton examKey={`${cat.id}/${exam.id}/${subject.id}`} title={`${exam.title} ${subject.name}`} />
+        </h1>
         <p>{exam.subtitle}</p>
       </div>
 
@@ -68,7 +71,7 @@ export default async function ExamPage({ params }: { params: Params }) {
       )}
 
       <div className="files">
-        {fileButtons.filter(b => b.show && cat.omr !== false && !(docs && b.key !== 'listening')).map(b => {
+        {fileButtons.filter(b => b.show && !docs).map(b => {
           const url = files[b.key] as string | undefined;
           return url ? (
             <a key={b.key} className="file" href={url} target="_blank" rel="noopener" download={b.key === 'listening' || undefined}>
@@ -82,7 +85,7 @@ export default async function ExamPage({ params }: { params: Params }) {
         })}
       </div>
 
-      <div className={`layout${cat.omr === false ? ' single' : ''}`}>
+      <div className="layout single">
         {docs ? (
           <DocViewer title={`${exam.title} ${subject.name}`} groups={docs.groups} />
         ) : <div className={`viewer${files.question ? '' : ' empty-viewer'}`}>
@@ -92,19 +95,10 @@ export default async function ExamPage({ params }: { params: Params }) {
             <div className="placeholder">
               <div className="big">📄</div>
               <p><b>문제지를 준비하고 있어요.</b></p>
-              <p>파일이 올라오면 이 자리에서 바로 볼 수 있어요.<br />그동안 OMR 답안 표기는 바로 쓸 수 있어요.</p>
+              <p>파일이 올라오면 이 자리에서 바로 볼 수 있어요.</p>
             </div>
           )}
         </div>}
-        {cat.omr !== false && (
-          <ExamTools
-            examKey={`${cat.id}/${exam.id}/${subject.id}`}
-            title={`${exam.title} ${subject.name}`}
-            subject={subject}
-            answers={files.answers}
-            demo={files.demo}
-          />
-        )}
       </div>
 
       <div className="pager">

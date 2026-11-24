@@ -26,7 +26,7 @@ export default function Home() {
         ))}
       </section>
 
-      <h2 className="section-title">최근 시행된 시험 <small>문제지·정답·채점</small></h2>
+      <h2 className="section-title">최근 시행된 시험 <small>문제지·정답·해설</small></h2>
       <div className="list">
         {recent.map(e => (
           <Link key={e.category + e.id} href={`/exams/${e.category}/${e.id}/${e.subjects[0]}/`}>

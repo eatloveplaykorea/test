@@ -148,6 +148,9 @@ table.grid { border-collapse: collapse; width: 100%; min-width: 560px; }
 .doc-list.stacked .doc-label { font-size: 16px; }
 .doc-list.stacked .doc-buttons { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
 .layout.single { grid-template-columns: 1fr; }
+.title-row { display: flex; align-items: center; gap: 6px; }
+.title-row .star { font-size: 26px; color: var(--muted); }
+.title-row .star:hover { color: var(--accent); }
 .school-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .school-list a { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; font-weight: 600; }
 .school-list a:hover { border-color: var(--accent); }
