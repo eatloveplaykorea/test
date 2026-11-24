@@ -1,0 +1,75 @@
+[
+ {
+  "key": "khu",
+  "label": "경희대",
+  "subjects": [
+   "eng",
+   "math",
+   "tsci"
+  ]
+ },
+ {
+  "key": "kw",
+  "label": "광운대",
+  "subjects": [
+   "eng",
+   "math"
+  ]
+ },
+ {
+  "key": "duksung",
+  "label": "덕성여대",
+  "subjects": [
+   "eng"
+  ]
+ },
+ {
+  "key": "dongguk",
+  "label": "동국대",
+  "subjects": [
+   "eng",
+   "math"
+  ]
+ },
+ {
+  "key": "sejong",
+  "label": "세종대",
+  "subjects": [
+   "eng",
+   "math"
+  ]
+ },
+ {
+  "key": "ssu",
+  "label": "숭실대",
+  "subjects": [
+   "eng",
+   "math"
+  ]
+ },
+ {
+  "key": "cau",
+  "label": "중앙대",
+  "subjects": [
+   "eng",
+   "math",
+   "tsci"
+  ]
+ },
+ {
+  "key": "hanyang",
+  "label": "한양대",
+  "subjects": [
+   "eng",
+   "math"
+  ]
+ },
+ {
+  "key": "hongik",
+  "label": "홍익대",
+  "subjects": [
+   "eng",
+   "math"
+  ]
+ }
+]

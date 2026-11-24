@@ -49,8 +49,10 @@ export interface Category {
   omr?: boolean; // false 이면 OMR 칸을 숨긴다
 }
 
-// 논술 대학 목록은 make_site_data.py 가 공개 자료로 만든다
+// 논술·편입 대학 목록은 make_site_data.py 가 만든다
 import essaySchools from './essay-schools.json';
+import transferSchoolsJson from './transfer-schools.json';
+const transferSchools = transferSchoolsJson as { key: string; label: string; subjects: SubjectId[] }[];
 
 const YEARS = [2026, 2025, 2024, 2023, 2022];
 
@@ -111,10 +113,8 @@ export const CATEGORIES: Category[] = [
     id: 'transfer', name: '편입 기출', short: '편입', emoji: '🏛️',
     desc: '대학별 편입학 필기시험 (대학 공식 게시분, 대학 사이트로 연결)',
     layout: 'school',
-    // 연세대·고려대·성균관대는 공식 원본을 찾지 못해 뺐다(2026-11-25 인수인계 기준)
-    columns: [
-      { key: 'hanyang', label: '한양대' }, { key: 'cau', label: '중앙대' }, { key: 'khu', label: '경희대' },
-    ],
+    // 대학 목록은 make_site_data.py 가 인수인계(westudy_kichul) 공식 자료로 만든다
+    columns: transferSchools.map(s => ({ key: s.key, label: s.label })),
     subjects: ['eng', 'math', 'tsci'],
     omr: false,
   },
@@ -176,8 +176,9 @@ function schoolExam(cat: Category, year: number, col: Category['columns'][number
     id: `${year}-${col.key}`, category: cat.id, year, column: col.key,
     title: cat.id === 'transfer' ? `${year} ${col.label} 편입` : `${year} ${col.label}`,
     subtitle: cat.id === 'transfer' ? `${year}학년도 편입학 필기시험` : `${year}년 공개경쟁채용 필기시험`,
-    // 한양대 편입은 과학(전공기초) 시험이 없다
-    organizer: col.label, subjects: cat.id === 'transfer' && col.key === 'hanyang' ? ['eng', 'math'] : cat.subjects,
+    // 편입은 대학마다 자료가 있는 과목만 탭으로 둔다
+    organizer: col.label,
+    subjects: cat.id === 'transfer' ? (transferSchools.find(s => s.key === col.key)?.subjects ?? cat.subjects) : cat.subjects,
   };
 }
 

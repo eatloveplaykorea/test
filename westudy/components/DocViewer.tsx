@@ -26,7 +26,7 @@ export default function DocViewer({ title, groups }: Props) {
         <div className="placeholder">
           <div className="big">🔗</div>
           <p><b>문제지는 대학 공식 사이트에서 열려요.</b></p>
-          <p>위 버튼을 누르면 대학이 게시한 원본 PDF가 새 창으로 열립니다.</p>
+          <p>위 버튼을 누르면 대학이 게시한 원본 파일이 새 창으로 열립니다. HWP·ZIP 파일은 내려받아 여세요.</p>
         </div>
       </div>
     );
@@ -64,7 +64,7 @@ export function DocList({ groups, stacked = false }: { groups: DocGroup[]; stack
             {g.docs.map(d => (
               <a key={d.url ?? d.path} className="file" href={docHref(d)} target="_blank" rel="noopener noreferrer">
                 <span className="ic">{DOC_LABEL[d.kind].icon}</span>
-                <span>{docTitle(d)}<small>{d.url ? '대학 공식 사이트 ↗' : `PDF · ${formatSize(d.size)}`}</small></span>
+                <span>{docTitle(d)}<small>{d.url ? `${d.format ? `${d.format} 파일 · ` : ''}대학 공식 사이트 ↗` : `PDF · ${formatSize(d.size)}`}</small></span>
               </a>
             ))}
           </div>
