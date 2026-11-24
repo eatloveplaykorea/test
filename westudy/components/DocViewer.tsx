@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { DOC_LABEL, docUrl, formatSize, type DocGroup } from '@/lib/docs';
+import { DOC_LABEL, docUrl, formatSize, type DocGroup } from '@/lib/doc-utils';
 
 interface Props {
   title: string;

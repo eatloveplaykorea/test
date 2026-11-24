@@ -54,6 +54,7 @@ export const CATEGORIES: Category[] = [
     layout: 'month',
     columns: [
       { key: '03', label: '3월', sub: '교육청' },
+      { key: '04', label: '4월', sub: '교육청' },
       { key: '05', label: '5월', sub: '교육청' },
       { key: '06', label: '6월', sub: '평가원' },
       { key: '07', label: '7월', sub: '교육청' },
@@ -69,7 +70,7 @@ export const CATEGORIES: Category[] = [
     layout: 'month',
     columns: [
       { key: '03', label: '3월' }, { key: '06', label: '6월' },
-      { key: '09', label: '9월' }, { key: '11', label: '11월' },
+      { key: '09', label: '9월' }, { key: '10', label: '10월' }, { key: '11', label: '11월' },
     ],
     subjects: ['kor', 'math', 'eng', 'hist', 'soc', 'sci'],
   },
@@ -79,7 +80,7 @@ export const CATEGORIES: Category[] = [
     layout: 'month',
     columns: [
       { key: '03', label: '3월' }, { key: '06', label: '6월' },
-      { key: '09', label: '9월' }, { key: '11', label: '11월' },
+      { key: '09', label: '9월' }, { key: '10', label: '10월' }, { key: '11', label: '11월' },
     ],
     subjects: ['kor', 'math', 'eng', 'hist', 'soc', 'sci'],
   },
