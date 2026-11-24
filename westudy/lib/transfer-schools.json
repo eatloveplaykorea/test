@@ -1,5 +1,21 @@
 [
  {
+  "key": "konkuk",
+  "label": "건국대",
+  "subjects": [
+   "eng",
+   "math"
+  ]
+ },
+ {
+  "key": "kyonggi",
+  "label": "경기대",
+  "subjects": [
+   "eng",
+   "math"
+  ]
+ },
+ {
   "key": "khu",
   "label": "경희대",
   "subjects": [
@@ -32,8 +48,23 @@
   ]
  },
  {
+  "key": "mju",
+  "label": "명지대",
+  "subjects": [
+   "eng"
+  ]
+ },
+ {
   "key": "sejong",
   "label": "세종대",
+  "subjects": [
+   "eng",
+   "math"
+  ]
+ },
+ {
+  "key": "sookmyung",
+  "label": "숙명여대",
   "subjects": [
    "eng",
    "math"
