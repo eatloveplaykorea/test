@@ -4,7 +4,7 @@
  * - 실제 파일 주소는 lib/files.ts 에서 관리합니다.
  */
 
-export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'pub-kor' | 'pub-eng' | 'pub-hist' | 'admin-law' | 'admin-study';
+export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'job' | 'lang2' | 'pub-kor' | 'pub-eng' | 'pub-hist' | 'admin-law' | 'admin-study';
 
 export interface Subject {
   id: SubjectId;
@@ -23,6 +23,8 @@ export const SUBJECTS: Record<SubjectId, Subject> = {
   hist: { id: 'hist', name: '한국사', minutes: 30, questions: 20, choices: 5 },
   soc: { id: 'soc', name: '사회탐구', minutes: 30, questions: 20, choices: 5 },
   sci: { id: 'sci', name: '과학탐구', minutes: 30, questions: 20, choices: 5 },
+  job: { id: 'job', name: '직업탐구', minutes: 30, questions: 20, choices: 5 },
+  lang2: { id: 'lang2', name: '제2외국어/한문', minutes: 40, questions: 30, choices: 5 },
   'pub-kor': { id: 'pub-kor', name: '국어', minutes: 20, questions: 20, choices: 4 },
   'pub-eng': { id: 'pub-eng', name: '영어', minutes: 20, questions: 20, choices: 4 },
   'pub-hist': { id: 'pub-hist', name: '한국사', minutes: 20, questions: 20, choices: 4 },
@@ -132,7 +134,9 @@ function monthExam(cat: Category, year: number, col: Category['columns'][number]
   }
   return {
     id: `${year}-${col.key}`, category: cat.id, year, column: col.key,
-    title, subtitle, organizer: isKice ? '평가원' : '교육청', subjects: cat.subjects,
+    title, subtitle, organizer: isKice ? '평가원' : '교육청',
+    // 수능은 직업탐구, 제2외국어/한문 탭을 함께 둔다
+    subjects: cat.id === 'g3' && col.key === '11' ? [...cat.subjects, 'job', 'lang2'] : cat.subjects,
   };
 }
 
