@@ -4,7 +4,7 @@
  * - 실제 파일 주소는 lib/files.ts 에서 관리합니다.
  */
 
-export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'job' | 'lang2' | 'essay' | 'tsci' | 'pub-kor' | 'pub-eng' | 'pub-hist' | 'admin-law' | 'admin-study';
+export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'job' | 'lang2' | 'essay' | 'tsci' | 'khs' | 'pub-kor' | 'pub-eng' | 'pub-hist' | 'admin-law' | 'admin-study';
 
 export interface Subject {
   id: SubjectId;
@@ -27,6 +27,7 @@ export const SUBJECTS: Record<SubjectId, Subject> = {
   lang2: { id: 'lang2', name: '제2외국어/한문', minutes: 40, questions: 30, choices: 5 },
   essay: { id: 'essay', name: '논술', minutes: 100, questions: 0, choices: 0 },
   tsci: { id: 'tsci', name: '과학(전공기초)', minutes: 60, questions: 0, choices: 0 },
+  khs: { id: 'khs', name: '한국사능력검정시험', minutes: 80, questions: 0, choices: 0 },
   'pub-kor': { id: 'pub-kor', name: '국어', minutes: 20, questions: 20, choices: 4 },
   'pub-eng': { id: 'pub-eng', name: '영어', minutes: 20, questions: 20, choices: 4 },
   'pub-hist': { id: 'pub-hist', name: '한국사', minutes: 20, questions: 20, choices: 4 },
@@ -34,7 +35,7 @@ export const SUBJECTS: Record<SubjectId, Subject> = {
   'admin-study': { id: 'admin-study', name: '행정학개론', minutes: 20, questions: 20, choices: 4 },
 };
 
-export type CategoryId = 'g3' | 'g2' | 'g1' | 'academy' | 'essay' | 'transfer' | 'civil';
+export type CategoryId = 'g3' | 'g2' | 'g1' | 'academy' | 'essay' | 'khs' | 'transfer' | 'civil';
 
 export interface Category {
   id: CategoryId;
@@ -52,6 +53,8 @@ export interface Category {
 // 논술·편입 대학 목록은 make_site_data.py 가 만든다
 import essaySchools from './essay-schools.json';
 import transferSchoolsJson from './transfer-schools.json';
+import khsRoundsJson from './khs-rounds.json';
+export const KHS_ROUNDS = khsRoundsJson as { key: string; label: string; levels: string[] }[];
 const transferSchools = transferSchoolsJson as { key: string; label: string; subjects: SubjectId[] }[];
 
 const YEARS = [2026, 2025, 2024, 2023, 2022];
@@ -107,6 +110,14 @@ export const CATEGORIES: Category[] = [
     layout: 'list',
     columns: (essaySchools as { key: string; label: string }[]).map(s => ({ key: s.key, label: s.label })),
     subjects: ['essay'],
+    omr: false,
+  },
+  {
+    id: 'khs', name: '한국사능력검정시험', short: '한능검', emoji: '📜',
+    desc: '국사편찬위원회 한국사능력검정시험 제1~80회 (심화·기본, 옛 고급·중급·초급·급수제)',
+    layout: 'list',
+    columns: KHS_ROUNDS.map(r => ({ key: r.key, label: r.label })),
+    subjects: ['khs'],
     omr: false,
   },
   {
@@ -184,6 +195,14 @@ function schoolExam(cat: Category, year: number, col: Category['columns'][number
 
 // 목록형(논술): 학교마다 한 페이지. 연도는 0(시행 연도 없음)
 function listExam(cat: Category, col: Category['columns'][number]): Exam {
+  if (cat.id === 'khs') {
+    const levels = KHS_ROUNDS.find(r => r.key === col.key)?.levels ?? [];
+    return {
+      id: col.key, category: cat.id, year: 0, column: col.key,
+      title: `한국사능력검정시험 ${col.label}`, subtitle: `${levels.join('·')} · 국사편찬위원회`,
+      organizer: col.label, subjects: cat.subjects,
+    };
+  }
   return {
     id: col.key, category: cat.id, year: 0, column: col.key,
     title: `${col.label} 논술`, subtitle: '수시 논술·모의논술 기출 · 대학 공개 자료',

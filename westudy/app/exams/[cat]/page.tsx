@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { CATEGORIES, YEARS_LIST, getCategory, getExam, isPast } from '@/lib/exams';
+import { CATEGORIES, KHS_ROUNDS, YEARS_LIST, getCategory, getExam, isPast } from '@/lib/exams';
 import { hasAnyFile } from '@/lib/files';
 import { docsOf } from '@/lib/docs';
 
@@ -21,20 +21,25 @@ export default async function CategoryPage({ params }: { params: Promise<{ cat: 
         <div className="page-head">
           <div className="crumb"><Link href="/">홈</Link> › {cat.short}</div>
           <h1>{cat.emoji} {cat.name}</h1>
-          <p>{cat.desc} · 대학을 누르면 연도별 기출을 볼 수 있어요.</p>
+          <p>{cat.desc} · {cat.id === 'khs' ? '회차를 누르면 등급별 문제지·정답표를 볼 수 있어요.' : '대학을 누르면 연도별 기출을 볼 수 있어요.'}</p>
         </div>
         <div className="school-list">
           {cat.columns.map(col => {
             const docs = docsOf(cat.id, col.key, cat.subjects[0]);
             const n = docs ? docs.groups.reduce((s, g) => s + g.docs.length, 0) : 0;
+            const levels = cat.id === 'khs' ? KHS_ROUNDS.find(r => r.key === col.key)?.levels.join('·') : null;
             return (
               <Link key={col.key} href={`/exams/${cat.id}/${col.key}/${cat.subjects[0]}/`}>
-                <span>{col.label}</span><small>{n}개</small>
+                <span>{col.label}</span><small>{levels ?? `${n}개`}</small>
               </Link>
             );
           })}
         </div>
-        <p className="legend">논술 자료의 저작권은 각 대학에 있습니다. 대학이 공개한 자료를 비영리 학습용으로 모았습니다.</p>
+        <p className="legend">
+          {cat.id === 'khs'
+            ? '한국사능력검정시험 저작권은 국사편찬위원회에 있습니다. 제57~80회는 공식 자료실 원본, 제1~56회는 공개 보관본입니다.'
+            : '논술 자료의 저작권은 각 대학에 있습니다. 대학이 공개한 자료를 비영리 학습용으로 모았습니다.'}
+        </p>
       </>
     );
   }

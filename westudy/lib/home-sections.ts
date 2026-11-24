@@ -32,7 +32,8 @@ export const HOME_SECTIONS: HomeSection[] = [
   },
   {
     id: 'history', title: '한능검·한국사', emoji: '📜', items: [
-      { label: '한국사능력검정시험 심화' }, { label: '한국사능력검정시험 기본' },
+      { label: '한국사능력검정시험 심화', href: '/exams/khs/' }, { label: '한국사능력검정시험 기본', href: '/exams/khs/' },
+      { label: '제1~56회 (옛 고급·중급·초급·급수)', href: '/exams/khs/' },
       { label: '공무원·수능·모의고사·검정고시 한국사' },
     ],
   },

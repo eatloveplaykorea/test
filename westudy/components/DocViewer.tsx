@@ -10,7 +10,7 @@ interface Props {
 /** 미리보기 PDF 선택 + 화면. 휴대폰에서는 CSS로 숨기고 위의 버튼으로 연다. 외부 공식 링크는 미리보기에서 뺀다. */
 export default function DocViewer({ title, groups }: Props) {
   const own = groups
-    .map(g => ({ ...g, docs: g.docs.filter(d => !d.url) }))
+    .map(g => ({ ...g, docs: g.docs.filter(d => !d.url && !d.format) }))
     .filter(g => g.docs.length > 0);
   const options = own.flatMap(g => g.docs.map(d => ({
     path: d.path,
@@ -64,7 +64,7 @@ export function DocList({ groups, stacked = false }: { groups: DocGroup[]; stack
             {g.docs.map(d => (
               <a key={d.url ?? d.path} className="file" href={docHref(d)} target="_blank" rel="noopener noreferrer">
                 <span className="ic">{DOC_LABEL[d.kind].icon}</span>
-                <span>{docTitle(d)}<small>{d.url ? `${d.format ? `${d.format} 파일 · ` : ''}대학 공식 사이트 ↗` : `PDF · ${formatSize(d.size)}`}</small></span>
+                <span>{docTitle(d)}<small>{d.url ? `${d.format ? `${d.format} 파일 · ` : ''}대학 공식 사이트 ↗` : `${d.format ? `${d.format} 내려받기` : 'PDF'} · ${formatSize(d.size)}`}</small></span>
               </a>
             ))}
           </div>

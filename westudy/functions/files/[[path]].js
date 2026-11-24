@@ -1,4 +1,4 @@
-// /files/... 주소로 R2의 PDF를 내려준다.
+// /files/... 주소로 R2의 PDF(와 한능검 옛 정답표 같은 HWP)를 내려준다.
 // R2 버킷 westudy-files 에는 공개로 정한 파일만 올린다(업데이트.bat 이 index.csv 의 공개여부=공개 만 업로드).
 // 그래서 버킷에 있는 PDF가 곧 공개 대상이다. 큰 허용 목록을 코드에 넣지 않아 파일이 수만 개여도 가볍다.
 
@@ -34,8 +34,15 @@ export function keyFromPathname(pathname) {
     decoded.push(value);
   }
   const key = decoded.join("/").normalize("NFC");
-  return key.toLowerCase().endsWith(".pdf") ? key : null;
+  return TYPES[extOf(key)] ? key : null;
 }
+
+// PDF는 화면에서 열고, 한글(HWP) 파일은 내려받게 한다
+const TYPES = {
+  pdf: { type: "application/pdf", inline: true },
+  hwp: { type: "application/x-hwp", inline: false },
+};
+const extOf = (key) => (key.split(".").pop() || "").toLowerCase();
 
 function contentDisposition(key, download) {
   const name = key.split("/").pop();
@@ -56,9 +63,10 @@ export async function onRequest({ request, env }) {
   if (!key) return text(404, "파일을 찾을 수 없습니다.");
   if (!env.FILES) return text(503, "파일 저장소가 연결되지 않았습니다.");
 
+  const t = TYPES[extOf(key)];
   const headers = new Headers({
-    "Content-Type": "application/pdf",
-    "Content-Disposition": contentDisposition(key, url.searchParams.get("download") === "1"),
+    "Content-Type": t.type,
+    "Content-Disposition": contentDisposition(key, !t.inline || url.searchParams.get("download") === "1"),
     "Cache-Control": CACHE_CONTROL,
     "Accept-Ranges": "bytes",
     "X-Content-Type-Options": "nosniff",
