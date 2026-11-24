@@ -4,7 +4,7 @@
  * - 실제 파일 주소는 lib/files.ts 에서 관리합니다.
  */
 
-export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'job' | 'lang2' | 'essay' | 'pub-kor' | 'pub-eng' | 'pub-hist' | 'admin-law' | 'admin-study';
+export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'job' | 'lang2' | 'essay' | 'tsci' | 'pub-kor' | 'pub-eng' | 'pub-hist' | 'admin-law' | 'admin-study';
 
 export interface Subject {
   id: SubjectId;
@@ -26,6 +26,7 @@ export const SUBJECTS: Record<SubjectId, Subject> = {
   job: { id: 'job', name: '직업탐구', minutes: 30, questions: 20, choices: 5 },
   lang2: { id: 'lang2', name: '제2외국어/한문', minutes: 40, questions: 30, choices: 5 },
   essay: { id: 'essay', name: '논술', minutes: 100, questions: 0, choices: 0 },
+  tsci: { id: 'tsci', name: '과학(전공기초)', minutes: 60, questions: 0, choices: 0 },
   'pub-kor': { id: 'pub-kor', name: '국어', minutes: 20, questions: 20, choices: 4 },
   'pub-eng': { id: 'pub-eng', name: '영어', minutes: 20, questions: 20, choices: 4 },
   'pub-hist': { id: 'pub-hist', name: '한국사', minutes: 20, questions: 20, choices: 4 },
@@ -108,14 +109,14 @@ export const CATEGORIES: Category[] = [
   },
   {
     id: 'transfer', name: '편입 기출', short: '편입', emoji: '🏛️',
-    desc: '대학별 편입학 필기시험 (공식 공개분)',
+    desc: '대학별 편입학 필기시험 (대학 공식 게시분, 대학 사이트로 연결)',
     layout: 'school',
+    // 연세대·고려대·성균관대는 공식 원본을 찾지 못해 뺐다(2026-11-25 인수인계 기준)
     columns: [
-      { key: 'yonsei', label: '연세대' }, { key: 'korea', label: '고려대' },
-      { key: 'skku', label: '성균관대' }, { key: 'hanyang', label: '한양대' },
-      { key: 'cau', label: '중앙대' }, { key: 'khu', label: '경희대' },
+      { key: 'hanyang', label: '한양대' }, { key: 'cau', label: '중앙대' }, { key: 'khu', label: '경희대' },
     ],
-    subjects: ['eng', 'math'],
+    subjects: ['eng', 'math', 'tsci'],
+    omr: false,
   },
   {
     id: 'civil', name: '공무원 기출', short: '공무원', emoji: '🗂️',
@@ -175,7 +176,8 @@ function schoolExam(cat: Category, year: number, col: Category['columns'][number
     id: `${year}-${col.key}`, category: cat.id, year, column: col.key,
     title: cat.id === 'transfer' ? `${year} ${col.label} 편입` : `${year} ${col.label}`,
     subtitle: cat.id === 'transfer' ? `${year}학년도 편입학 필기시험` : `${year}년 공개경쟁채용 필기시험`,
-    organizer: col.label, subjects: cat.subjects,
+    // 한양대 편입은 과학(전공기초) 시험이 없다
+    organizer: col.label, subjects: cat.id === 'transfer' && col.key === 'hanyang' ? ['eng', 'math'] : cat.subjects,
   };
 }
 

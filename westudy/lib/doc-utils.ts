@@ -2,8 +2,11 @@
 
 export type DocKind = 'question' | 'answer-solution' | 'answer' | 'solution' | 'script' | 'other';
 
-/** title: 버튼에 종류 대신 보여 줄 이름(논술처럼 한 묶음에 파일이 많을 때) */
-export interface ExamDoc { kind: DocKind; path: string; size: number; title?: string }
+/**
+ * title: 버튼에 종류 대신 보여 줄 이름(논술처럼 한 묶음에 파일이 많을 때)
+ * url: 다른 기관 공식 사이트 주소. 있으면 R2 대신 그 주소로 연결하고 미리보기에서 뺀다(재배포하지 않는 자료).
+ */
+export interface ExamDoc { kind: DocKind; path: string; size: number; title?: string; url?: string }
 export interface DocGroup { label: string; docs: ExamDoc[] }
 export interface SubjectDocs { source: string; groups: DocGroup[] }
 
@@ -17,6 +20,7 @@ export const DOC_LABEL: Record<DocKind, { icon: string; label: string }> = {
 };
 
 export const docTitle = (d: ExamDoc) => d.title ?? DOC_LABEL[d.kind].label;
+export const docHref = (d: ExamDoc) => d.url ?? docUrl(d.path);
 
 /** R2 경로 -> 사이트 주소. 경로 조각마다 인코딩한다. */
 export const docUrl = (path: string) => '/files/' + path.split('/').map(encodeURIComponent).join('/');
