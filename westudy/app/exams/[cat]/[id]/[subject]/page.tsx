@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { EXAMS, SUBJECTS, getCategory, getExam, isPast, neighbors, type SubjectId } from '@/lib/exams';
 import { filesOf } from '@/lib/files';
+import { docsOf } from '@/lib/docs';
 import ExamTools from '@/components/ExamTools';
+import DocViewer, { DocList } from '@/components/DocViewer';
 
 type Params = Promise<{ cat: string; id: string; subject: string }>;
 
@@ -24,6 +26,7 @@ export default async function ExamPage({ params }: { params: Params }) {
   if (!cat || !exam || !subject || !exam.subjects.includes(subject.id)) notFound();
 
   const files = filesOf(cat.id, exam.id, subject.id);
+  const docs = docsOf(cat.id, exam.id, subject.id);
   const { prev, next } = neighbors(exam);
   const base = `/exams/${cat.id}`;
 
@@ -52,8 +55,18 @@ export default async function ExamPage({ params }: { params: Params }) {
         ))}
       </nav>
 
+      {docs && (
+        <>
+          <DocList groups={docs.groups} />
+          <p className="doc-source">
+            출처: {docs.source} · 비영리 학습용으로 게시합니다.
+            <span className="mobile-only"> 휴대폰에서는 위 버튼을 누르면 PDF가 열려요.</span>
+          </p>
+        </>
+      )}
+
       <div className="files">
-        {fileButtons.filter(b => b.show).map(b => {
+        {fileButtons.filter(b => b.show && !(docs && b.key !== 'listening')).map(b => {
           const url = files[b.key] as string | undefined;
           return url ? (
             <a key={b.key} className="file" href={url} target="_blank" rel="noopener" download={b.key === 'listening' || undefined}>
@@ -68,7 +81,9 @@ export default async function ExamPage({ params }: { params: Params }) {
       </div>
 
       <div className="layout">
-        <div className={`viewer${files.question ? '' : ' empty-viewer'}`}>
+        {docs ? (
+          <DocViewer title={`${exam.title} ${subject.name}`} groups={docs.groups} />
+        ) : <div className={`viewer${files.question ? '' : ' empty-viewer'}`}>
           {files.question ? (
             <iframe src={files.question} title={`${exam.title} ${subject.name} 문제지`} />
           ) : (
@@ -78,7 +93,7 @@ export default async function ExamPage({ params }: { params: Params }) {
               <p>파일이 올라오면 이 자리에서 바로 볼 수 있어요.<br />그동안 실전모드와 OMR 채점은 바로 쓸 수 있어요.</p>
             </div>
           )}
-        </div>
+        </div>}
         <ExamTools
           examKey={`${cat.id}/${exam.id}/${subject.id}`}
           title={`${exam.title} ${subject.name}`}

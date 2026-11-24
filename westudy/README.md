@@ -26,8 +26,13 @@ npm run build      # out/ 폴더에 정적 사이트 생성 → 어디든 올리
 
 ## 시험지 올리기
 
-1. PDF를 `public/files/` 아래에 두거나(작을 때), Cloudflare R2 같은 저장소에 올립니다(많을 때).
-2. `lib/files.ts` 에 주소를 적습니다.
+PDF는 Cloudflare R2 버킷 `westudy-files`에 두고, Pages Functions(`functions/files/[[path]].js`)가 `/files/...` 주소로 내려줍니다. Pages 설정의 R2 바인딩 이름은 `FILES`입니다.
+
+1. PDF를 rclone으로 R2에 올립니다(경로는 로컬 `정리` 폴더 구조 그대로).
+2. 공개할 파일을 `lib/public-files.json`에 넣습니다. 여기에 없는 경로는 404입니다.
+3. 로컬에서 `make_site_data.py`를 실행해 `lib/exam-docs.json`을 다시 만듭니다. 과목 페이지의 선택과목별 버튼은 이 파일로 생깁니다.
+
+듣기 파일과 OMR 정답은 `lib/files.ts`에 적습니다.
 
 ```ts
 'g3/2025-11/math': {
@@ -39,7 +44,6 @@ npm run build      # out/ 폴더에 정적 사이트 생성 → 어디든 올리
 
 - 키 형식: `분류/시험ID/과목ID` — 분류 `g3 g2 g1 transfer civil`, 과목 ID는 `lib/exams.ts` 의 `SUBJECTS`
 - 파일이 있는 시험은 표에 초록 점(●)이 붙습니다.
-- 지금 들어 있는 `demo: true` 항목 두 개는 **가짜 정답**입니다. 실제 데이터를 넣을 때 지워 주세요.
 - 연도·시험·대학을 늘리려면 `lib/exams.ts` 의 `YEARS`, `CATEGORIES` 를 고칩니다.
 
 ## 저작권
