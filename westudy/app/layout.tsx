@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <footer>
           <div className="wrap">
             <p>we.study.today · 기출문제 모음</p>
-            <p>수능·모의평가 저작권은 한국교육과정평가원, 학력평가 저작권은 각 시·도교육청에 있습니다. 출처를 밝히고 비영리로 제공합니다.</p>
+            <p>수능·모의평가 저작권은 한국교육과정평가원, 학력평가 저작권은 각 시·도교육청, 논술·사관학교 기출 저작권은 각 대학·사관학교에 있습니다. 출처를 밝히고 비영리로 제공합니다.</p>
           </div>
         </footer>
       </body>

@@ -41,23 +41,25 @@ export default async function ExamPage({ params }: { params: Params }) {
     <>
       <div className="page-head">
         <div className="crumb">
-          <Link href="/">홈</Link> › <Link href={`${base}/`}>{cat.short}</Link> › {exam.year}
+          <Link href="/">홈</Link> › <Link href={`${base}/`}>{cat.short}</Link> › {exam.year || exam.organizer}
         </div>
         <h1>{exam.title}</h1>
         <p>{exam.subtitle}</p>
       </div>
 
-      <nav className="subject-tabs" aria-label="과목">
-        {exam.subjects.map(s => (
-          <Link key={s} href={`${base}/${exam.id}/${s}/`} className={s === subject.id ? 'on' : ''}>
-            {SUBJECTS[s].name}
-          </Link>
-        ))}
-      </nav>
+      {exam.subjects.length > 1 && (
+        <nav className="subject-tabs" aria-label="과목">
+          {exam.subjects.map(s => (
+            <Link key={s} href={`${base}/${exam.id}/${s}/`} className={s === subject.id ? 'on' : ''}>
+              {SUBJECTS[s].name}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       {docs && (
         <>
-          <DocList groups={docs.groups} />
+          <DocList groups={docs.groups} stacked={cat.layout === 'list'} />
           <p className="doc-source">
             출처: {docs.source} · 비영리 학습용으로 게시합니다.
             <span className="mobile-only"> 휴대폰에서는 위 버튼을 누르면 PDF가 열려요.</span>
@@ -66,7 +68,7 @@ export default async function ExamPage({ params }: { params: Params }) {
       )}
 
       <div className="files">
-        {fileButtons.filter(b => b.show && !(docs && b.key !== 'listening')).map(b => {
+        {fileButtons.filter(b => b.show && cat.omr !== false && !(docs && b.key !== 'listening')).map(b => {
           const url = files[b.key] as string | undefined;
           return url ? (
             <a key={b.key} className="file" href={url} target="_blank" rel="noopener" download={b.key === 'listening' || undefined}>
@@ -80,7 +82,7 @@ export default async function ExamPage({ params }: { params: Params }) {
         })}
       </div>
 
-      <div className="layout">
+      <div className={`layout${cat.omr === false ? ' single' : ''}`}>
         {docs ? (
           <DocViewer title={`${exam.title} ${subject.name}`} groups={docs.groups} />
         ) : <div className={`viewer${files.question ? '' : ' empty-viewer'}`}>
@@ -94,13 +96,15 @@ export default async function ExamPage({ params }: { params: Params }) {
             </div>
           )}
         </div>}
-        <ExamTools
-          examKey={`${cat.id}/${exam.id}/${subject.id}`}
-          title={`${exam.title} ${subject.name}`}
-          subject={subject}
-          answers={files.answers}
-          demo={files.demo}
-        />
+        {cat.omr !== false && (
+          <ExamTools
+            examKey={`${cat.id}/${exam.id}/${subject.id}`}
+            title={`${exam.title} ${subject.name}`}
+            subject={subject}
+            answers={files.answers}
+            demo={files.demo}
+          />
+        )}
       </div>
 
       <div className="pager">

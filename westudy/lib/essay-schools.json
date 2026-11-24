@@ -1,0 +1,130 @@
+[
+ {
+  "key": "gachon",
+  "label": "가천대"
+ },
+ {
+  "key": "catholic",
+  "label": "가톨릭대"
+ },
+ {
+  "key": "konkuk",
+  "label": "건국대"
+ },
+ {
+  "key": "kyonggi",
+  "label": "경기대"
+ },
+ {
+  "key": "knu",
+  "label": "경북대"
+ },
+ {
+  "key": "khu",
+  "label": "경희대"
+ },
+ {
+  "key": "korea",
+  "label": "고려대"
+ },
+ {
+  "key": "kw",
+  "label": "광운대"
+ },
+ {
+  "key": "dankook",
+  "label": "단국대"
+ },
+ {
+  "key": "dongguk",
+  "label": "동국대"
+ },
+ {
+  "key": "pusan",
+  "label": "부산대"
+ },
+ {
+  "key": "smu",
+  "label": "상명대"
+ },
+ {
+  "key": "sogang",
+  "label": "서강대"
+ },
+ {
+  "key": "skuniv",
+  "label": "서경대"
+ },
+ {
+  "key": "seoultech",
+  "label": "서울과기대"
+ },
+ {
+  "key": "uos",
+  "label": "서울시립대"
+ },
+ {
+  "key": "swu",
+  "label": "서울여대"
+ },
+ {
+  "key": "skku",
+  "label": "성균관대"
+ },
+ {
+  "key": "sungshin",
+  "label": "성신여대"
+ },
+ {
+  "key": "sejong",
+  "label": "세종대"
+ },
+ {
+  "key": "sookmyung",
+  "label": "숙명여대"
+ },
+ {
+  "key": "ssu",
+  "label": "숭실대"
+ },
+ {
+  "key": "ajou",
+  "label": "아주대"
+ },
+ {
+  "key": "yonsei",
+  "label": "연세대"
+ },
+ {
+  "key": "eulji",
+  "label": "을지대"
+ },
+ {
+  "key": "ewha",
+  "label": "이화여대"
+ },
+ {
+  "key": "inha",
+  "label": "인하대"
+ },
+ {
+  "key": "cau",
+  "label": "중앙대"
+ },
+ {
+  "key": "hufs",
+  "label": "한국외대"
+ },
+ {
+  "key": "kau",
+  "label": "한국항공대"
+ },
+ {
+  "key": "hanyang",
+  "label": "한양대"
+ },
+ {
+  "key": "hongik",
+  "label": "홍익대"
+ }
+]

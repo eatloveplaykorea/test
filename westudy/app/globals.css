@@ -143,6 +143,15 @@ table.grid { border-collapse: collapse; width: 100%; min-width: 560px; }
 .doc-group:not(:has(.doc-label)) { grid-template-columns: 1fr; }
 .doc-label { font-weight: 700; font-size: 15px; }
 .doc-buttons { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+.doc-list.stacked { gap: 18px; }
+.doc-list.stacked .doc-group { grid-template-columns: 1fr; gap: 6px; }
+.doc-list.stacked .doc-label { font-size: 16px; }
+.doc-list.stacked .doc-buttons { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.layout.single { grid-template-columns: 1fr; }
+.school-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.school-list a { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; font-weight: 600; }
+.school-list a:hover { border-color: var(--accent); }
+.school-list small { color: var(--muted); font-weight: 400; font-size: 12px; }
 .doc-source { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
 .mobile-only { display: none; }
 .viewer.has-doc { flex-direction: column; }

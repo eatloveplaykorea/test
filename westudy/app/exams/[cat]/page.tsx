@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CATEGORIES, YEARS_LIST, getCategory, getExam, isPast } from '@/lib/exams';
 import { hasAnyFile } from '@/lib/files';
+import { docsOf } from '@/lib/docs';
 
 export const generateStaticParams = () => CATEGORIES.map(c => ({ cat: c.id }));
 
@@ -13,6 +14,30 @@ export async function generateMetadata({ params }: { params: Promise<{ cat: stri
 export default async function CategoryPage({ params }: { params: Promise<{ cat: string }> }) {
   const cat = getCategory((await params).cat);
   if (!cat) notFound();
+
+  if (cat.layout === 'list') {
+    return (
+      <>
+        <div className="page-head">
+          <div className="crumb"><Link href="/">홈</Link> › {cat.short}</div>
+          <h1>{cat.emoji} {cat.name}</h1>
+          <p>{cat.desc} · 대학을 누르면 연도별 기출을 볼 수 있어요.</p>
+        </div>
+        <div className="school-list">
+          {cat.columns.map(col => {
+            const docs = docsOf(cat.id, col.key, cat.subjects[0]);
+            const n = docs ? docs.groups.reduce((s, g) => s + g.docs.length, 0) : 0;
+            return (
+              <Link key={col.key} href={`/exams/${cat.id}/${col.key}/${cat.subjects[0]}/`}>
+                <span>{col.label}</span><small>{n}개</small>
+              </Link>
+            );
+          })}
+        </div>
+        <p className="legend">논술 자료의 저작권은 각 대학에 있습니다. 대학이 공개한 자료를 비영리 학습용으로 모았습니다.</p>
+      </>
+    );
+  }
 
   return (
     <>
@@ -46,7 +71,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ cat: 
                         className={hasAnyFile(cat.id, exam.id) ? 'ready' : ''}
                         title={exam.title}
                       >
-                        {cat.layout === 'month' && col.key === '11' && cat.id === 'g3' ? `${year + 1}학년도` : '보기'}
+                        {(cat.layout === 'month' && col.key === '11' && cat.id === 'g3') || cat.id === 'academy' ? `${year + 1}학년도` : '보기'}
                       </Link>
                     </td>
                   );

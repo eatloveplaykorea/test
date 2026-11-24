@@ -12,7 +12,7 @@ export default function Home() {
     <>
       <section className="hero">
         <h1>찾는 기출, 한 번에.</h1>
-        <p>수능 · 고1·2·3 모의고사 · 편입 · 공무원 기출을 연도와 과목으로 바로 찾아보세요.</p>
+        <p>수능 · 고1·2·3 모의고사 · 사관학교 · 대학 논술 기출을 연도와 과목으로 바로 찾아보세요.</p>
         <SearchBox autoFocus />
       </section>
 

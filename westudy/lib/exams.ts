@@ -4,7 +4,7 @@
  * - 실제 파일 주소는 lib/files.ts 에서 관리합니다.
  */
 
-export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'job' | 'lang2' | 'pub-kor' | 'pub-eng' | 'pub-hist' | 'admin-law' | 'admin-study';
+export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'job' | 'lang2' | 'essay' | 'pub-kor' | 'pub-eng' | 'pub-hist' | 'admin-law' | 'admin-study';
 
 export interface Subject {
   id: SubjectId;
@@ -25,6 +25,7 @@ export const SUBJECTS: Record<SubjectId, Subject> = {
   sci: { id: 'sci', name: '과학탐구', minutes: 30, questions: 20, choices: 5 },
   job: { id: 'job', name: '직업탐구', minutes: 30, questions: 20, choices: 5 },
   lang2: { id: 'lang2', name: '제2외국어/한문', minutes: 40, questions: 30, choices: 5 },
+  essay: { id: 'essay', name: '논술', minutes: 100, questions: 0, choices: 0 },
   'pub-kor': { id: 'pub-kor', name: '국어', minutes: 20, questions: 20, choices: 4 },
   'pub-eng': { id: 'pub-eng', name: '영어', minutes: 20, questions: 20, choices: 4 },
   'pub-hist': { id: 'pub-hist', name: '한국사', minutes: 20, questions: 20, choices: 4 },
@@ -32,7 +33,7 @@ export const SUBJECTS: Record<SubjectId, Subject> = {
   'admin-study': { id: 'admin-study', name: '행정학개론', minutes: 20, questions: 20, choices: 4 },
 };
 
-export type CategoryId = 'g3' | 'g2' | 'g1' | 'transfer' | 'civil';
+export type CategoryId = 'g3' | 'g2' | 'g1' | 'academy' | 'essay' | 'transfer' | 'civil';
 
 export interface Category {
   id: CategoryId;
@@ -40,10 +41,15 @@ export interface Category {
   short: string;
   emoji: string;
   desc: string;
-  layout: 'month' | 'school'; // month: 연도×시행월 표, school: 학교(대학·직렬)×연도 표
+  // month: 연도×시행월 표, school: 학교(대학·직렬)×연도 표, list: 학교 목록(연도 구분 없이 학교별 한 페이지)
+  layout: 'month' | 'school' | 'list';
   columns: { key: string; label: string; sub?: string }[];
   subjects: SubjectId[];
+  omr?: boolean; // false 이면 실전모드·OMR 칸을 숨긴다
 }
+
+// 논술 대학 목록은 make_site_data.py 가 공개 자료로 만든다
+import essaySchools from './essay-schools.json';
 
 const YEARS = [2026, 2025, 2024, 2023, 2022];
 
@@ -85,6 +91,22 @@ export const CATEGORIES: Category[] = [
     subjects: ['kor', 'math', 'eng', 'hist', 'soc', 'sci'],
   },
   {
+    id: 'academy', name: '사관학교 1차', short: '사관학교', emoji: '🎖️',
+    desc: '사관학교 1차 필기시험 (국어·수학·영어)',
+    layout: 'month',
+    columns: [{ key: '07', label: '1차 시험', sub: '7월' }],
+    subjects: ['kor', 'math', 'eng'],
+    omr: false,
+  },
+  {
+    id: 'essay', name: '대학 논술', short: '논술', emoji: '✍️',
+    desc: '대학별 수시 논술·모의논술 기출 (대학 공개 자료)',
+    layout: 'list',
+    columns: (essaySchools as { key: string; label: string }[]).map(s => ({ key: s.key, label: s.label })),
+    subjects: ['essay'],
+    omr: false,
+  },
+  {
     id: 'transfer', name: '편입 기출', short: '편입', emoji: '🏛️',
     desc: '대학별 편입학 필기시험 (공식 공개분)',
     layout: 'school',
@@ -123,6 +145,13 @@ function monthExam(cat: Category, year: number, col: Category['columns'][number]
   const grade = cat.id === 'g3' ? '고3' : cat.id === 'g2' ? '고2' : '고1';
   let title: string;
   let subtitle: string;
+  if (cat.id === 'academy') {
+    return {
+      id: `${year}-${col.key}`, category: cat.id, year, column: col.key,
+      title: `${year + 1}학년도 사관학교 1차`, subtitle: `${year}년 7월 시행 · 사관학교`,
+      organizer: '사관학교', subjects: cat.subjects,
+    };
+  }
   if (cat.id === 'g3' && col.key === '11') {
     title = `${year + 1}학년도 수능`;
     subtitle = `${year}년 11월 시행 · 한국교육과정평가원`;
@@ -150,9 +179,20 @@ function schoolExam(cat: Category, year: number, col: Category['columns'][number
   };
 }
 
+// 목록형(논술): 학교마다 한 페이지. 연도는 0(시행 연도 없음)
+function listExam(cat: Category, col: Category['columns'][number]): Exam {
+  return {
+    id: col.key, category: cat.id, year: 0, column: col.key,
+    title: `${col.label} 논술`, subtitle: '수시 논술·모의논술 기출 · 대학 공개 자료',
+    organizer: col.label, subjects: cat.subjects,
+  };
+}
+
 export const EXAMS: Exam[] = CATEGORIES.flatMap(cat =>
-  YEARS.flatMap(year => cat.columns.map(col =>
-    cat.layout === 'month' ? monthExam(cat, year, col) : schoolExam(cat, year, col))));
+  cat.layout === 'list'
+    ? cat.columns.map(col => listExam(cat, col))
+    : YEARS.flatMap(year => cat.columns.map(col =>
+      cat.layout === 'month' ? monthExam(cat, year, col) : schoolExam(cat, year, col))));
 
 // 아직 시행되지 않은 시험은 목록에서 뺀다 (오늘: 2026-11 기준, 2026 수능까지 시행)
 const NOW = { year: 2026, month: 11 };
