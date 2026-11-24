@@ -9,7 +9,7 @@ export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'job' 
 export interface Subject {
   id: SubjectId;
   name: string;
-  minutes: number;   // 실전모드 제한 시간
+  minutes: number;   // 시험 시간(분)
   questions: number; // OMR 문항 수
   choices: number;   // 0 이면 주관식(숫자 입력)만
   short?: number[];  // 단답형(숫자 입력) 문항 번호
@@ -45,7 +45,7 @@ export interface Category {
   layout: 'month' | 'school' | 'list';
   columns: { key: string; label: string; sub?: string }[];
   subjects: SubjectId[];
-  omr?: boolean; // false 이면 실전모드·OMR 칸을 숨긴다
+  omr?: boolean; // false 이면 OMR 칸을 숨긴다
 }
 
 // 논술 대학 목록은 make_site_data.py 가 공개 자료로 만든다

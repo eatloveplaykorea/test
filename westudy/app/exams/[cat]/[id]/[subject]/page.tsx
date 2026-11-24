@@ -92,7 +92,7 @@ export default async function ExamPage({ params }: { params: Params }) {
             <div className="placeholder">
               <div className="big">📄</div>
               <p><b>문제지를 준비하고 있어요.</b></p>
-              <p>파일이 올라오면 이 자리에서 바로 볼 수 있어요.<br />그동안 실전모드와 OMR 채점은 바로 쓸 수 있어요.</p>
+              <p>파일이 올라오면 이 자리에서 바로 볼 수 있어요.<br />그동안 OMR 답안 표기는 바로 쓸 수 있어요.</p>
             </div>
           )}
         </div>}

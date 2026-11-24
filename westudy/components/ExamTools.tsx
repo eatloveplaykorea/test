@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Subject } from '@/lib/exams';
 import { readStore, writeStore, toggleSaved, isSaved } from '@/lib/store';
 
@@ -11,19 +11,10 @@ interface Props {
   demo?: boolean;
 }
 
-const fmt = (s: number) => {
-  const m = Math.floor(s / 60), r = s % 60;
-  return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
-};
-
 export default function ExamTools({ examKey, title, subject, answers, demo }: Props) {
-  const total = subject.minutes * 60;
-  const [left, setLeft] = useState(total);
-  const [running, setRunning] = useState(false);
   const [marks, setMarks] = useState<(number | null)[]>(() => Array(subject.questions).fill(null));
   const [graded, setGraded] = useState(false);
   const [saved, setSaved] = useState(false);
-  const tick = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // 저장된 답안·즐겨찾기 불러오기
   useEffect(() => {
@@ -31,15 +22,6 @@ export default function ExamTools({ examKey, title, subject, answers, demo }: Pr
     if (m && m.length === subject.questions) setMarks(m);
     setSaved(isSaved(examKey));
   }, [examKey, subject.questions]);
-
-  useEffect(() => {
-    if (!running) return;
-    tick.current = setInterval(() => setLeft(l => {
-      if (l <= 1) { setRunning(false); return 0; }
-      return l - 1;
-    }), 1000);
-    return () => { if (tick.current) clearInterval(tick.current); };
-  }, [running]);
 
   const setMark = (i: number, v: number | null) => {
     if (graded) return;
@@ -64,7 +46,7 @@ export default function ExamTools({ examKey, title, subject, answers, demo }: Pr
     <aside>
       <div className="panel">
         <h3>
-          실전모드 <small>{subject.name} {subject.minutes}분</small>
+          <span>OMR 답안 <small>{done}/{subject.questions} 표기</small></span>
           <button
             className="star"
             aria-label={saved ? '저장 취소' : '저장'}
@@ -72,18 +54,6 @@ export default function ExamTools({ examKey, title, subject, answers, demo }: Pr
             onClick={() => setSaved(toggleSaved({ key: examKey, title, href: location.pathname }))}
           >{saved ? '★' : '☆'}</button>
         </h3>
-        <div className={`timer${left <= 300 && left > 0 ? ' low' : ''}`}>{left === 0 ? '시험 종료' : fmt(left)}</div>
-        <div className="progress"><div style={{ width: `${(1 - left / total) * 100}%` }} /></div>
-        <div className="row">
-          <button className="btn primary" onClick={() => setRunning(r => !r)} disabled={left === 0}>
-            {running ? '일시정지' : left === total ? '시작' : '계속'}
-          </button>
-          <button className="btn" onClick={() => { setRunning(false); setLeft(total); }}>처음부터</button>
-        </div>
-      </div>
-
-      <div className="panel">
-        <h3>OMR 답안 <small>{done}/{subject.questions} 표기</small></h3>
         {demo && <div className="notice">데모 정답이에요. 실제 정답이 아니니 화면 확인용으로만 써 주세요.</div>}
         {graded && answers && (
           <div className="score">
@@ -134,7 +104,7 @@ export default function ExamTools({ examKey, title, subject, answers, demo }: Pr
           {answers ? (
             graded
               ? <button className="btn" onClick={() => setGraded(false)}>다시 고치기</button>
-              : <button className="btn primary" onClick={() => { setGraded(true); setRunning(false); }}>채점하기</button>
+              : <button className="btn primary" onClick={() => setGraded(true)}>채점하기</button>
           ) : (
             <button className="btn" disabled title="정답이 올라오면 채점할 수 있어요">정답 준비 중</button>
           )}
