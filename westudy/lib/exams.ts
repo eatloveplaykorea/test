@@ -4,7 +4,7 @@
  * - 실제 파일 주소는 lib/files.ts 에서 관리합니다.
  */
 
-export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'job' | 'lang2' | 'essay' | 'tsci' | 'khs' | 'civil' | 'realtor' | 'pub-kor' | 'pub-eng' | 'pub-hist' | 'admin-law' | 'admin-study';
+export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'job' | 'lang2' | 'essay' | 'tsci' | 'khs' | 'civil' | 'realtor' | 'ged' | 'pub-kor' | 'pub-eng' | 'pub-hist' | 'admin-law' | 'admin-study';
 
 export interface Subject {
   id: SubjectId;
@@ -30,6 +30,7 @@ export const SUBJECTS: Record<SubjectId, Subject> = {
   khs: { id: 'khs', name: '한국사능력검정시험', minutes: 80, questions: 0, choices: 0 },
   civil: { id: 'civil', name: '공무원 시험', minutes: 0, questions: 0, choices: 0 },
   realtor: { id: 'realtor', name: '공인중개사', minutes: 0, questions: 0, choices: 0 },
+  ged: { id: 'ged', name: '검정고시', minutes: 0, questions: 0, choices: 0 },
   'pub-kor': { id: 'pub-kor', name: '국어', minutes: 20, questions: 20, choices: 4 },
   'pub-eng': { id: 'pub-eng', name: '영어', minutes: 20, questions: 20, choices: 4 },
   'pub-hist': { id: 'pub-hist', name: '한국사', minutes: 20, questions: 20, choices: 4 },
@@ -37,7 +38,7 @@ export const SUBJECTS: Record<SubjectId, Subject> = {
   'admin-study': { id: 'admin-study', name: '행정학개론', minutes: 20, questions: 20, choices: 4 },
 };
 
-export type CategoryId = 'g3' | 'g2' | 'g1' | 'academy' | 'essay' | 'khs' | 'transfer' | 'civil' | 'realtor';
+export type CategoryId = 'g3' | 'g2' | 'g1' | 'academy' | 'essay' | 'khs' | 'transfer' | 'civil' | 'realtor' | 'ged';
 
 export interface Category {
   id: CategoryId;
@@ -60,6 +61,8 @@ import civilExamsJson from './civil-exams.json';
 import realtorRoundsJson from './realtor-rounds.json';
 export const CIVIL_EXAMS = civilExamsJson as { key: string; label: string; series: string; year: number }[];
 const REALTOR_ROUNDS = realtorRoundsJson as { key: string; label: string; round: number; year: number }[];
+import gedExamsJson from './ged-exams.json';
+export const GED_EXAMS = gedExamsJson as { key: string; label: string; series: string; year: number; round: number }[];
 export const KHS_ROUNDS = khsRoundsJson as { key: string; label: string; levels: string[] }[];
 const transferSchools = transferSchoolsJson as { key: string; label: string; subjects: SubjectId[] }[];
 
@@ -144,6 +147,14 @@ export const CATEGORIES: Category[] = [
     omr: false,
   },
   {
+    id: 'ged', name: '검정고시', short: '검정고시', emoji: '📝',
+    desc: '초졸·중졸·고졸 검정고시 2015년 제2회~2026년 제2회 문제지·정답',
+    layout: 'list',
+    columns: GED_EXAMS.map(e => ({ key: e.key, label: e.label })),
+    subjects: ['ged'],
+    omr: false,
+  },
+  {
     id: 'realtor', name: '공인중개사', short: '공인중개사', emoji: '🏠',
     desc: '한국산업인력공단 큐넷 공개 문제지·최종정답 2013~2026',
     layout: 'list',
@@ -213,6 +224,13 @@ function listExam(cat: Category, col: Category['columns'][number]): Exam {
       id: col.key, category: cat.id, year: 0, column: col.key,
       title: col.label, subtitle: '인사혁신처 공개 기출 · 문제지·최종정답',
       organizer: e?.series ?? '인사혁신처', subjects: cat.subjects,
+    };
+  }
+  if (cat.id === 'ged') {
+    return {
+      id: col.key, category: cat.id, year: 0, column: col.key,
+      title: col.label, subtitle: '과목별 문제지·정답 · 한국교육과정평가원·시도교육청',
+      organizer: GED_EXAMS.find(x => x.key === col.key)?.series ?? '검정고시', subjects: cat.subjects,
     };
   }
   if (cat.id === 'realtor') {

@@ -27,7 +27,8 @@ export const HOME_SECTIONS: HomeSection[] = [
   },
   {
     id: 'ged', title: '검정고시', emoji: '📝', items: [
-      { label: '초졸 검정고시' }, { label: '중졸 검정고시' }, { label: '고졸 검정고시' }, { label: '회차·과목별 기출' },
+      { label: '초졸 검정고시', href: '/exams/ged/' }, { label: '중졸 검정고시', href: '/exams/ged/' },
+      { label: '고졸 검정고시', href: '/exams/ged/' }, { label: '회차·과목별 기출', href: '/exams/ged/' },
     ],
   },
   {

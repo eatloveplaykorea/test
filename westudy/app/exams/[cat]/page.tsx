@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { CATEGORIES, CIVIL_EXAMS, KHS_ROUNDS, YEARS_LIST, getCategory, getExam, isPast } from '@/lib/exams';
+import { CATEGORIES, CIVIL_EXAMS, GED_EXAMS, KHS_ROUNDS, YEARS_LIST, getCategory, getExam, isPast } from '@/lib/exams';
 import { hasAnyFile } from '@/lib/files';
 import { docsOf } from '@/lib/docs';
 
@@ -15,11 +15,39 @@ export default async function CategoryPage({ params }: { params: Promise<{ cat: 
   const cat = getCategory((await params).cat);
   if (!cat) notFound();
 
-  if (cat.id === 'civil') {
-    // 공무원: 시험 종류별로 묶고 연도 버튼(최근 연도 먼저). 회차가 많은 종류를 위로.
-    const bySeries = new Map<string, typeof CIVIL_EXAMS>();
-    for (const e of CIVIL_EXAMS) bySeries.set(e.series, [...(bySeries.get(e.series) ?? []), e]);
-    const series = [...bySeries.entries()].sort((a, b) => b[1].length - a[1].length);
+  if (cat.id === 'civil' || cat.id === 'ged') {
+    // 공무원: 시험 종류별 / 검정고시: 초졸·중졸·고졸별로 묶고 회차 버튼(최근 먼저)
+    type G = { key: string; series: string; year: number; round?: number };
+    const rows: G[] = cat.id === 'ged' ? GED_EXAMS : CIVIL_EXAMS;
+    const bySeries = new Map<string, G[]>();
+    for (const e of rows) bySeries.set(e.series, [...(bySeries.get(e.series) ?? []), e]);
+    const order = ['초졸 검정고시', '중졸 검정고시', '고졸 검정고시'];
+    const series = [...bySeries.entries()].sort((a, b) =>
+      cat.id === 'ged' ? order.indexOf(a[0]) - order.indexOf(b[0]) : b[1].length - a[1].length);
+    if (cat.id === 'ged') {
+      return (
+        <>
+          <div className="page-head">
+            <div className="crumb"><Link href="/">홈</Link> › {cat.short}</div>
+            <h1>{cat.emoji} {cat.name}</h1>
+            <p>{cat.desc} · 회차를 누르면 과목별 문제지·정답을 볼 수 있어요.</p>
+          </div>
+          <div className="dir">
+            {series.map(([name, list]) => (
+              <div key={name} className="dir-card">
+                <div className="dir-head"><b>{name}</b><small>{list.length}회</small></div>
+                <div className="dir-items">
+                  {[...list].sort((a, b) => b.year - a.year || (b.round ?? 0) - (a.round ?? 0)).map(e => (
+                    <Link key={e.key} href={`/exams/ged/${e.key}/ged/`} className="chip on">{e.year} {e.round}회</Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="legend">출처: 한국교육과정평가원(2018~2026), 세종·충북·인천교육청(2015~2017). 저작권은 출제 기관에 있습니다.</p>
+        </>
+      );
+    }
     return (
       <>
         <div className="page-head">
