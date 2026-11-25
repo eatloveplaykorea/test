@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { CATEGORIES, KHS_ROUNDS, YEARS_LIST, getCategory, getExam, isPast } from '@/lib/exams';
+import { CATEGORIES, CIVIL_EXAMS, KHS_ROUNDS, YEARS_LIST, getCategory, getExam, isPast } from '@/lib/exams';
 import { hasAnyFile } from '@/lib/files';
 import { docsOf } from '@/lib/docs';
 
@@ -15,13 +15,50 @@ export default async function CategoryPage({ params }: { params: Promise<{ cat: 
   const cat = getCategory((await params).cat);
   if (!cat) notFound();
 
-  if (cat.layout === 'list') {
+  if (cat.id === 'civil') {
+    // 공무원: 시험 종류별로 묶고 연도 버튼(최근 연도 먼저). 회차가 많은 종류를 위로.
+    const bySeries = new Map<string, typeof CIVIL_EXAMS>();
+    for (const e of CIVIL_EXAMS) bySeries.set(e.series, [...(bySeries.get(e.series) ?? []), e]);
+    const series = [...bySeries.entries()].sort((a, b) => b[1].length - a[1].length);
     return (
       <>
         <div className="page-head">
           <div className="crumb"><Link href="/">홈</Link> › {cat.short}</div>
           <h1>{cat.emoji} {cat.name}</h1>
-          <p>{cat.desc} · {cat.id === 'khs' ? '회차를 누르면 등급별 문제지·정답표를 볼 수 있어요.' : '대학을 누르면 연도별 기출을 볼 수 있어요.'}</p>
+          <p>{cat.desc} · 연도를 누르면 과목별 문제지·최종정답을 볼 수 있어요.</p>
+        </div>
+        <div className="dir">
+          {series.map(([name, list]) => (
+            <div key={name} className="dir-card">
+              <div className="dir-head"><b>{name}</b><small>{list.length}회</small></div>
+              <div className="dir-items">
+                {[...list].sort((a, b) => b.year - a.year).map(e => (
+                  <Link key={e.key} href={`/exams/civil/${e.key}/civil/`} className="chip on">{e.year}</Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="legend">출처: 인사혁신처 공무원시험 기출문제(공공데이터포털, 이용허락범위 제한 없음).</p>
+      </>
+    );
+  }
+
+  if (cat.layout === 'list') {
+    const hint = cat.id === 'khs' ? '회차를 누르면 등급별 문제지·정답표를 볼 수 있어요.'
+      : cat.id === 'realtor' ? '회차를 누르면 1차·2차 문제지와 최종정답을 볼 수 있어요.'
+      : '대학을 누르면 연도별 기출을 볼 수 있어요.';
+    const legend = cat.id === 'khs'
+      ? '한국사능력검정시험 저작권은 국사편찬위원회에 있습니다. 제57~80회는 공식 자료실 원본, 제1~56회는 공개 보관본입니다.'
+      : cat.id === 'realtor'
+        ? '출처: 한국산업인력공단 큐넷 공인중개사 시험문제지·최종정답(공공누리 제1유형, 2013년 자료부터).'
+        : '논술 자료의 저작권은 각 대학에 있습니다. 대학이 공개한 자료를 비영리 학습용으로 모았습니다.';
+    return (
+      <>
+        <div className="page-head">
+          <div className="crumb"><Link href="/">홈</Link> › {cat.short}</div>
+          <h1>{cat.emoji} {cat.name}</h1>
+          <p>{cat.desc} · {hint}</p>
         </div>
         <div className="school-list">
           {cat.columns.map(col => {
@@ -35,11 +72,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ cat: 
             );
           })}
         </div>
-        <p className="legend">
-          {cat.id === 'khs'
-            ? '한국사능력검정시험 저작권은 국사편찬위원회에 있습니다. 제57~80회는 공식 자료실 원본, 제1~56회는 공개 보관본입니다.'
-            : '논술 자료의 저작권은 각 대학에 있습니다. 대학이 공개한 자료를 비영리 학습용으로 모았습니다.'}
-        </p>
+        <p className="legend">{legend}</p>
       </>
     );
   }

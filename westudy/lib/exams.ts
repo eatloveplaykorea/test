@@ -4,7 +4,7 @@
  * - 실제 파일 주소는 lib/files.ts 에서 관리합니다.
  */
 
-export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'job' | 'lang2' | 'essay' | 'tsci' | 'khs' | 'pub-kor' | 'pub-eng' | 'pub-hist' | 'admin-law' | 'admin-study';
+export type SubjectId = 'kor' | 'math' | 'eng' | 'hist' | 'soc' | 'sci' | 'job' | 'lang2' | 'essay' | 'tsci' | 'khs' | 'civil' | 'realtor' | 'pub-kor' | 'pub-eng' | 'pub-hist' | 'admin-law' | 'admin-study';
 
 export interface Subject {
   id: SubjectId;
@@ -28,6 +28,8 @@ export const SUBJECTS: Record<SubjectId, Subject> = {
   essay: { id: 'essay', name: '논술', minutes: 100, questions: 0, choices: 0 },
   tsci: { id: 'tsci', name: '과학(전공기초)', minutes: 60, questions: 0, choices: 0 },
   khs: { id: 'khs', name: '한국사능력검정시험', minutes: 80, questions: 0, choices: 0 },
+  civil: { id: 'civil', name: '공무원 시험', minutes: 0, questions: 0, choices: 0 },
+  realtor: { id: 'realtor', name: '공인중개사', minutes: 0, questions: 0, choices: 0 },
   'pub-kor': { id: 'pub-kor', name: '국어', minutes: 20, questions: 20, choices: 4 },
   'pub-eng': { id: 'pub-eng', name: '영어', minutes: 20, questions: 20, choices: 4 },
   'pub-hist': { id: 'pub-hist', name: '한국사', minutes: 20, questions: 20, choices: 4 },
@@ -35,7 +37,7 @@ export const SUBJECTS: Record<SubjectId, Subject> = {
   'admin-study': { id: 'admin-study', name: '행정학개론', minutes: 20, questions: 20, choices: 4 },
 };
 
-export type CategoryId = 'g3' | 'g2' | 'g1' | 'academy' | 'essay' | 'khs' | 'transfer' | 'civil';
+export type CategoryId = 'g3' | 'g2' | 'g1' | 'academy' | 'essay' | 'khs' | 'transfer' | 'civil' | 'realtor';
 
 export interface Category {
   id: CategoryId;
@@ -54,6 +56,10 @@ export interface Category {
 import essaySchools from './essay-schools.json';
 import transferSchoolsJson from './transfer-schools.json';
 import khsRoundsJson from './khs-rounds.json';
+import civilExamsJson from './civil-exams.json';
+import realtorRoundsJson from './realtor-rounds.json';
+export const CIVIL_EXAMS = civilExamsJson as { key: string; label: string; series: string; year: number }[];
+const REALTOR_ROUNDS = realtorRoundsJson as { key: string; label: string; round: number; year: number }[];
 export const KHS_ROUNDS = khsRoundsJson as { key: string; label: string; levels: string[] }[];
 const transferSchools = transferSchoolsJson as { key: string; label: string; subjects: SubjectId[] }[];
 
@@ -131,13 +137,19 @@ export const CATEGORIES: Category[] = [
   },
   {
     id: 'civil', name: '공무원 기출', short: '공무원', emoji: '🗂️',
-    desc: '국가직·지방직 9급 공개경쟁채용',
-    layout: 'school',
-    columns: [
-      { key: 'national9', label: '국가직 9급' },
-      { key: 'local9', label: '지방직 9급' },
-    ],
-    subjects: ['pub-kor', 'pub-eng', 'pub-hist', 'admin-law', 'admin-study'],
+    desc: '인사혁신처 공개 기출 2005~2026 (9급·7급·5급·지방직·외교관후보자 등)',
+    layout: 'list',
+    columns: CIVIL_EXAMS.map(e => ({ key: e.key, label: e.label })),
+    subjects: ['civil'],
+    omr: false,
+  },
+  {
+    id: 'realtor', name: '공인중개사', short: '공인중개사', emoji: '🏠',
+    desc: '한국산업인력공단 큐넷 공개 문제지·최종정답 2013~2026',
+    layout: 'list',
+    columns: REALTOR_ROUNDS.map(r => ({ key: r.key, label: r.label })),
+    subjects: ['realtor'],
+    omr: false,
   },
 ];
 
@@ -195,6 +207,21 @@ function schoolExam(cat: Category, year: number, col: Category['columns'][number
 
 // 목록형(논술): 학교마다 한 페이지. 연도는 0(시행 연도 없음)
 function listExam(cat: Category, col: Category['columns'][number]): Exam {
+  if (cat.id === 'civil') {
+    const e = CIVIL_EXAMS.find(x => x.key === col.key);
+    return {
+      id: col.key, category: cat.id, year: 0, column: col.key,
+      title: col.label, subtitle: '인사혁신처 공개 기출 · 문제지·최종정답',
+      organizer: e?.series ?? '인사혁신처', subjects: cat.subjects,
+    };
+  }
+  if (cat.id === 'realtor') {
+    return {
+      id: col.key, category: cat.id, year: 0, column: col.key,
+      title: `공인중개사 ${col.label}`, subtitle: '한국산업인력공단 큐넷 · 1차·2차 문제지·최종정답',
+      organizer: col.label, subjects: cat.subjects,
+    };
+  }
   if (cat.id === 'khs') {
     const levels = KHS_ROUNDS.find(r => r.key === col.key)?.levels ?? [];
     return {

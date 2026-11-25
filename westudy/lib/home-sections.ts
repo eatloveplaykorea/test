@@ -39,7 +39,8 @@ export const HOME_SECTIONS: HomeSection[] = [
   },
   {
     id: 'civil', title: '공무원', emoji: '🗂️', items: [
-      { label: '국가직·지방직 9급' }, { label: '국가직·지방직 7급' }, { label: '5급 공채' }, { label: '외교관후보자' },
+      { label: '국가직·지방직 9급', href: '/exams/civil/' }, { label: '국가직·지방직 7급', href: '/exams/civil/' },
+      { label: '5급 공채', href: '/exams/civil/' }, { label: '외교관후보자', href: '/exams/civil/' },
       { label: '국회직' }, { label: '법원직' }, { label: '군무원' }, { label: '경찰공무원' }, { label: '소방공무원' }, { label: '해양경찰' },
     ],
   },
@@ -69,7 +70,7 @@ export const HOME_SECTIONS: HomeSection[] = [
   },
   {
     id: 'law', title: '부동산·법률·전문직', emoji: '⚖️', items: [
-      { label: '공인중개사' }, { label: '주택관리사보' }, { label: '감정평가사' }, { label: '공인노무사' }, { label: '행정사' },
+      { label: '공인중개사', href: '/exams/realtor/' }, { label: '주택관리사보' }, { label: '감정평가사' }, { label: '공인노무사' }, { label: '행정사' },
       { label: '법무사' }, { label: '변리사' }, { label: '관세사' }, { label: '변호사시험' },
     ],
   },
